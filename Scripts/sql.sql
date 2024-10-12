@@ -1,0 +1,61 @@
+CREATE TABLE Corretor (
+    Codigo VARCHAR(255) NOT NULL PRIMARY KEY,
+    Nome VARCHAR(255) NOT NULL,
+    CPF VARCHAR(14) NOT NULL
+);
+
+CREATE TABLE Cliente (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Nome VARCHAR(255) NOT NULL,
+    CPF VARCHAR(14) NOT NULL,
+    Endereco VARCHAR(255) NOT NULL,
+    UF INT NOT NULL,
+    Cidade INT NOT NULL,
+    Ativo BIT NOT NULL
+);
+
+CREATE TABLE ClienteXCorretor (
+    IdCorretor VARCHAR(255) NOT NULL,
+    IdCliente INT NOT NULL,
+    PRIMARY KEY (IdCorretor, IdCliente),
+    FOREIGN KEY (IdCorretor) REFERENCES Corretor(Codigo),
+    FOREIGN KEY (IdCliente) REFERENCES Cliente(Id)
+);
+
+CREATE TABLE UF (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Nome VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE Cidade (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Nome VARCHAR(255) NOT NULL,
+    IdUF INT NOT NULL,
+    FOREIGN KEY (IdUF) REFERENCES UF(Id)
+);
+
+ALTER TABLE Cliente
+ADD FOREIGN KEY (UF) REFERENCES UF(Id),
+    FOREIGN KEY (Cidade) REFERENCES Cidade(Id);
+GO
+
+
+CREATE OR ALTER PROCEDURE UpdateClienteAtivo
+    @Id INT,
+    @Ativo BIT
+AS
+BEGIN
+    UPDATE Cliente
+    SET Ativo = @Ativo
+    WHERE Id = @Id
+END
+GO 
+
+CREATE OR ALTER PROCEDURE DeleteCliente
+    @Id INT
+AS
+BEGIN
+    DELETE FROM ClienteXCorretor WHERE IdCliente = @Id;
+
+    DELETE FROM Cliente WHERE Id = @Id;
+END
